@@ -29,24 +29,27 @@ Built for [Google Build with AI 2025](https://buildwithai.devpost.com/).
 
 ### Agents
 
-| Agent | Type | Description |
-|-------|------|-------------|
-| **smart_code_builder** | Router | Analyzes requests and delegates to the right sub-agent |
-| **improve_code** | LlmAgent | Reviews and refactors existing code applying open source best practices |
-| **create_code** | LlmAgent | Generates new code from natural language descriptions |
-| **modernize_code** | LlmAgent | Transforms legacy code to modern versions (Python 3.12+, ES2024+, TS 5.x+) |
-| **audit_repo** | SequentialAgent | Clones a GitHub repository and generates a quality/security/architecture audit report |
+| Agent | Type | Model Tier | Description |
+|-------|------|------------|-------------|
+| **smart_code_builder** | Router | `router` (Flash-Lite) | Analyzes requests and delegates to the right sub-agent |
+| **improve_code** | LlmAgent | `heavy` (Pro) | Reviews and refactors existing code applying open source best practices |
+| **create_code** | LlmAgent | `fast` (Flash) | Generates new code from natural language descriptions |
+| **modernize_code** | LlmAgent | `heavy` (Pro) | Transforms legacy code to modern versions (Python 3.12+, ES2024+, TS 5.x+) |
+| **audit_repo** | SequentialAgent | — | Clones a GitHub repository and generates a quality/security/architecture audit report |
+| ↳ repo_crawler | LlmAgent | `fast` (Flash) | Explores repository structure and reads key files |
+| ↳ audit_reporter | LlmAgent | `heavy` (Pro) | Analyzes code against standards and produces scored report |
 
 ### Tools
 
 | Tool | Description |
 |------|-------------|
 | `detect_code_language` | Detects programming language from code content or filename |
-| `load_coding_standards` | Loads open source coding standards (Python, TypeScript, JavaScript) |
-| `clone_git_repository` | Shallow clones a public GitHub repository |
+| `load_coding_standards` | Loads open source coding standards (Python, TypeScript, JavaScript) with LRU caching |
+| `clone_git_repository` | Shallow clones a public GitHub repository (auto-cleans old repos) |
 | `list_repository_tree` | Lists the file structure of a cloned repository |
-| `list_analyzable_files` | Lists source code files suitable for analysis |
-| `read_file_content` | Reads file content with size limits |
+| `list_analyzable_files` | Lists source code files suitable for analysis (max 20 files) |
+| `read_file_content` | Reads file content with 50KB size limit |
+| `estimate_tokens` | Estimates token count using Gemini tokenizer (fallback: ~1.3 tokens/word) |
 
 ### Standards
 
@@ -93,10 +96,15 @@ cp .env.example .env
 
 Edit `.env` with your values:
 
-```
+```bash
 GCP_PROJECT_ID=your-gcp-project-id
 GCP_LOCATION=global
-MODEL_ID=gemini-3.1-pro-preview
+
+# Model tiers (cost/capability)
+ROUTER_MODEL=gemini-2.5-flash-lite   # Routing, classification (cheapest)
+FAST_MODEL=gemini-2.5-flash           # Code generation, crawling (balanced)
+HEAVY_MODEL=gemini-2.5-pro            # Deep analysis, audits (best quality)
+MODEL_ID=gemini-2.5-flash             # Fallback (optional)
 ```
 
 ### 4. Run locally
@@ -184,7 +192,8 @@ bwia-smart-code-builder/
 │   └── _tools/                  # Agent tools
 │       ├── code_tools.py        # Language detection
 │       ├── file_tools.py        # Repository operations
-│       └── standards_tools.py   # Standards loader
+│       ├── standards_tools.py   # Standards loader (LRU cached)
+│       └── token_tools.py       # Token estimation
 ├── standards/                   # Coding standards (open source)
 │   ├── python_standards.md      # Python best practices
 │   └── typescript_standards.md  # TypeScript best practices
@@ -200,7 +209,12 @@ bwia-smart-code-builder/
 ## Tech Stack
 
 - **Agent Framework**: [Google ADK](https://google.github.io/adk-docs/) (Agent Development Kit)
-- **Model**: Gemini 3.1 Pro Preview (via Vertex AI)
+- **Models**: Multi-tier Gemini via Vertex AI
+  | Tier | Model | Use Case |
+  |------|-------|----------|
+  | `router` | gemini-2.5-flash-lite | Intent classification (lowest cost) |
+  | `fast` | gemini-2.5-flash | Code generation, repo crawling |
+  | `heavy` | gemini-2.5-pro | Deep analysis, code review, audits |
 - **Runtime**: Python 3.11+ / FastAPI / Uvicorn
 - **Deployment**: Google Cloud Run + Artifact Registry
 - **Container**: Podman (Docker compatible)

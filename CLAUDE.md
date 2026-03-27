@@ -13,10 +13,11 @@ Este proyecto usa estandares open source en `standards/`:
 - `smart_code_builder/audit_agent.py` - Pipeline secuencial (crawler + reporter)
 - `smart_code_builder/_tools/` - Tools compartidas entre agentes
 - `smart_code_builder/config.py` - Env vars y paths (STANDARDS_DIR, TEMP_DIR)
+- `smart_code_builder/model.py` - Factory multi-modelo: get_model(tier), get_generate_config(tier)
 
 ## Arquitectura
 - Framework de agentes: Google ADK (Agent Development Kit)
-- Modelo: Gemini 3.1 Pro Preview (nativo en ADK)
+- Modelos: Multi-tier via Vertex AI (router=flash-lite, fast=flash, heavy=pro)
 - UI: ADK Web (`adk web smart_code_builder`)
 - 4 sub-agentes: improve_code, create_code, modernize_code, audit_repo
 - Root Agent actua como router inteligente
@@ -36,4 +37,7 @@ make all
 ## Variables de Entorno (smart_code_builder/.env)
 - `GCP_PROJECT_ID`: ID del proyecto GCP
 - `GCP_LOCATION`: Region (default: global)
-- `MODEL_ID`: ID del modelo Gemini (default: gemini-3.1-pro-preview)
+- `ROUTER_MODEL`: Modelo para routing (default: gemini-2.5-flash-lite)
+- `FAST_MODEL`: Modelo para generacion/crawling (default: gemini-2.5-flash)
+- `HEAVY_MODEL`: Modelo para analisis profundo (default: gemini-2.5-pro)
+- `MODEL_ID`: Fallback general (default: gemini-2.5-flash) — no usado directamente por agentes
