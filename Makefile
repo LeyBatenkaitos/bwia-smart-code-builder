@@ -47,10 +47,10 @@ deploy: push
 		--set-env-vars "GCP_PROJECT_ID=$(PROJECT_ID),GCP_LOCATION=global"
 
 local:
-	adk run smart_code_builder
+	adk run .
 
 web:
-	adk web smart_code_builder
+	adk web .
 
 logs:
 	gcloud run services logs read $(SERVICE_NAME) \
