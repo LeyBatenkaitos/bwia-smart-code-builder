@@ -237,7 +237,7 @@ Write-Host ""
 Write-Host "Para ejecutar la aplicacion:"
 Write-Host ""
 Write-Host "  .\.venv\Scripts\Activate.ps1" -ForegroundColor Yellow
-Write-Host "  adk web smart_code_builder" -ForegroundColor Yellow
+Write-Host "  adk web ." -ForegroundColor Yellow
 Write-Host ""
 Write-Host "La app estara disponible en: http://localhost:8000"
 Write-Host ""

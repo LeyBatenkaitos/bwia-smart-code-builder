@@ -291,7 +291,7 @@ echo
 echo "Para ejecutar la aplicacion:"
 echo
 echo -e "  ${YELLOW}source .venv/bin/activate${NC}"
-echo -e "  ${YELLOW}adk web smart_code_builder${NC}"
+echo -e "  ${YELLOW}adk web .${NC}"
 echo
 echo "La app estara disponible en: http://localhost:8000"
 echo
